@@ -83,43 +83,7 @@ enum Shape {
   SCISSORS;
 }
 
-extension ResultX on Result {
-  int get resultScore {
-    switch (this) {
-      case Result.WIN:
-        {
-          return 6;
-        }
-      case Result.LOSE:
-        {
-          return 0;
-        }
-      case Result.DRAW:
-        {
-          return 3;
-        }
-    }
-  }
-
-  int score(Shape other) {
-    switch (this) {
-      case Result.WIN:
-        {
-          return other.beatenBy.shapeScore + resultScore;
-        }
-      case Result.LOSE:
-        {
-          return other.beat.shapeScore + resultScore;
-        }
-      case Result.DRAW:
-        {
-          return other.shapeScore + resultScore;
-        }
-    }
-  }
-}
-
-extension ShapeX on Shape {
+extension on Shape {
   Shape get beat {
     if (this == Shape.ROCK) return Shape.SCISSORS;
     if (this == Shape.PAPER) return Shape.ROCK;
@@ -159,5 +123,41 @@ extension ShapeX on Shape {
     return other.beatenBy == this
         ? Result.WIN.resultScore + shapeScore
         : Result.LOSE.resultScore + shapeScore;
+  }
+}
+
+extension on Result {
+  int get resultScore {
+    switch (this) {
+      case Result.WIN:
+        {
+          return 6;
+        }
+      case Result.LOSE:
+        {
+          return 0;
+        }
+      case Result.DRAW:
+        {
+          return 3;
+        }
+    }
+  }
+
+  int score(Shape other) {
+    switch (this) {
+      case Result.WIN:
+        {
+          return other.beatenBy.shapeScore + resultScore;
+        }
+      case Result.LOSE:
+        {
+          return other.beat.shapeScore + resultScore;
+        }
+      case Result.DRAW:
+        {
+          return other.shapeScore + resultScore;
+        }
+    }
   }
 }
