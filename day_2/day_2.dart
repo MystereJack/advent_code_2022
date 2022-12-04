@@ -1,29 +1,30 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:convert';
 import 'dart:io';
 
 void main(List<String> arguments) {
-  int scoreTotalPartOne = 0;
-  int scoreTotalPartTwo = 0;
-  File('day_2/input.txt')
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(LineSplitter())
-      .forEach((element) {
-    // PART 1
-    var shapeOpponent = _getShape(element.substring(0, 1));
-    var shapeMine = _getShape(element.substring(2, 3));
+  final lines = File('inputs/day_2.txt')
+      .readAsStringSync()
+      .split('\n')
+      .where((line) => line.isNotEmpty);
 
-    scoreTotalPartOne += shapeMine.score(shapeOpponent);
+  int partOne = 0;
+  int partTwo = 0;
+
+  for (var line in lines) {
+    // PART 1
+    var shapeOpponent = _getShape(line.substring(0, 1));
+    var shapeMine = _getShape(line.substring(2, 3));
+
+    partOne += shapeMine.score(shapeOpponent);
 
     // PART 2
-    var result = _getResult(element.substring(2, 3));
-    scoreTotalPartTwo += result.score(shapeOpponent);
-  }).then((value) {
-    print('SCORE PART 1 : $scoreTotalPartOne');
-    print('SCORE PART 2 : $scoreTotalPartTwo');
-  });
+    var result = _getResult(line.substring(2, 3));
+    partTwo += result.score(shapeOpponent);
+  }
+
+  print('SCORE PART 1 : $partOne');
+  print('SCORE PART 2 : $partTwo');
 }
 
 Result _getResult(String result) {

@@ -1,24 +1,23 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+
+import 'package:collection/collection.dart';
 
 void main(List<String> arguments) {
+  final lines = File('inputs/day_1.txt').readAsStringSync().split('\n');
+
   List<int> elves = [];
   var calories = 0;
-  File('day_1/input.txt')
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(LineSplitter())
-      .forEach((value) {
-    if (value.isEmpty) {
+
+  for (var line in lines) {
+    if (line.isEmpty) {
       elves.add(calories);
       calories = 0;
     } else {
-      calories += int.parse(value);
+      calories += int.parse(line);
     }
-  }).then((_) {
-    elves.sort((a, b) => b.compareTo(a));
-    print('FIRST : ${elves.reduce(max)}');
-    print('SECOND : ${elves.sublist(0, 3).fold(0, (p, e) => p + e)}');
-  });
+  }
+
+  elves.sort((a, b) => b.compareTo(a));
+  print('FIRST : ${elves.max}');
+  print('SECOND : ${elves.sublist(0, 3).sum}');
 }

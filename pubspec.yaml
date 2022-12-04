@@ -1,13 +1,14 @@
-name: day_2
-description: A sample command-line application.
+name: advent_of_code
+description: Advent of Code 2022
 version: 1.0.0
-# homepage: https://www.example.com
 
 environment:
   sdk: '>=2.18.4 <3.0.0'
 
-# dependencies:
-#   path: ^1.8.0
+dependencies:
+  tuple: ^2.0.1
+  collection: ^1.17.0
+  quiver: ^3.1.0
 
 dev_dependencies:
   lints: ^2.0.0
