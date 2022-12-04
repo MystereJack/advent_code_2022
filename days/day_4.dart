@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:tuple/tuple.dart';
 
 typedef Section = Tuple2<Set<int>, Set<int>>;
@@ -11,16 +10,16 @@ void main(List<String> arguments) {
       .split('\n')
       .where((line) => line.isNotEmpty)
       .map(_createSection)
-      .map(_calculateContains)
-      .sum;
+      .where(_contains)
+      .length;
 
   int solution2 = File('inputs/day_4.txt')
       .readAsStringSync()
       .split('\n')
       .where((line) => line.isNotEmpty)
       .map(_createSection)
-      .map(_calculateOverlap)
-      .sum;
+      .where(_overlap)
+      .length;
 
   print('1 : $solution1');
   print('2 : $solution2');
@@ -33,19 +32,13 @@ Section _createSection(String line) {
   return Tuple2(left[0].upTo(left[1]), right[0].upTo(right[1]));
 }
 
-int _calculateContains(Section section) {
-  if (section.item1.difference(section.item2).isEmpty ||
-      section.item2.difference(section.item1).isEmpty) {
-    return 1;
-  }
-  return 0;
+bool _contains(Section section) {
+  return section.item1.difference(section.item2).isEmpty ||
+      section.item2.difference(section.item1).isEmpty;
 }
 
-int _calculateOverlap(Section section) {
-  if (section.item1.intersection(section.item2).isNotEmpty) {
-    return 1;
-  }
-  return 0;
+bool _overlap(Section section) {
+  return section.item1.intersection(section.item2).isNotEmpty;
 }
 
 extension on int {
