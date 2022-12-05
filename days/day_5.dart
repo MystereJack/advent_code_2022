@@ -5,25 +5,25 @@ import 'package:tuple/tuple.dart';
 import '../common/stack.dart';
 
 void main(List<String> arguments) {
-  List<Stack<String>> last = File('inputs/day_5.txt')
-      .readAsStringSync()
-      .split('\n')
-      .sublist(10)
-      .where((line) => line.isNotEmpty)
-      .map(_createOrder)
-      .fold(_initial, _applyOrder9000);
+  String solution1 = _obtainResult(
+    File('inputs/day_5.txt')
+        .readAsStringSync()
+        .split('\n')
+        .sublist(10)
+        .where((line) => line.isNotEmpty)
+        .map(_createOrder)
+        .fold(_initial, _applyOrder9000),
+  );
 
-  String solution1 = _obtainResult(last);
-
-  last = File('inputs/day_5.txt')
-      .readAsStringSync()
-      .split('\n')
-      .sublist(10)
-      .where((line) => line.isNotEmpty)
-      .map(_createOrder)
-      .fold(_initial, _applyOrder9001);
-
-  String solution2 = _obtainResult(last);
+  String solution2 = _obtainResult(
+    File('inputs/day_5.txt')
+        .readAsStringSync()
+        .split('\n')
+        .sublist(10)
+        .where((line) => line.isNotEmpty)
+        .map(_createOrder)
+        .fold(_initial, _applyOrder9001),
+  );
 
   print('1 : $solution1');
   print('2 : $solution2');
