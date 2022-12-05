@@ -4,6 +4,8 @@ import 'package:tuple/tuple.dart';
 
 import '../common/stack.dart';
 
+typedef Order = Tuple3<int, int, int>;
+
 void main(List<String> arguments) {
   String solution1 = _obtainResult(
     File('inputs/day_5.txt')
@@ -81,8 +83,6 @@ String _obtainResult(List<Stack<String>> stack) {
   }
   return result;
 }
-
-typedef Order = Tuple3<int, int, int>;
 
 extension StackX<E> on Stack<E> {
   List<E> popMulti(int nb) {
