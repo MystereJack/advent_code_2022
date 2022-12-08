@@ -34,14 +34,14 @@ void main(List<String> arguments) {
         bottom: _calculateBottom(coordinates, i, j),
         top: _calculateTop(coordinates, i, j),
       ));
-      print(forest.last);
     }
   }
 
   int solution1 = forest.where((e) => e.visible).length;
+  int solution2 = forest.map((e) => e.score(coordinates)).reduce(max);
 
   print('1 : $solution1');
-  // print('2 : ${currentDirectory.root.solution2}');
+  print('2 : $solution2');
 }
 
 int? _calculateTop(List<List<int>> coordinates, int i, int j) {
@@ -105,6 +105,83 @@ class Tree {
     }
 
     return false;
+  }
+
+  int score(List<List<int>> coordinates) {
+    int score = 1;
+    score *= _scoreLeft(coordinates);
+    score *= _scoreRight(coordinates);
+    score *= _scoreTop(coordinates);
+    score *= _scoreBottom(coordinates);
+
+    return score;
+  }
+
+  int _scoreLeft(List<List<int>> coordinates) {
+    if (positionX == 0) {
+      return 0;
+    }
+
+    int score = 0;
+
+    for (int i = positionX - 1; i >= 0; i--) {
+      score += 1;
+      if (coordinates[positionY][i] >= height) {
+        break;
+      }
+    }
+
+    return score;
+  }
+
+  int _scoreTop(List<List<int>> coordinates) {
+    if (positionY == 0) {
+      return 0;
+    }
+
+    int score = 0;
+
+    for (int j = positionY - 1; j >= 0; j--) {
+      score += 1;
+      if (coordinates[j][positionX] >= height) {
+        break;
+      }
+    }
+    return score;
+  }
+
+  int _scoreBottom(List<List<int>> coordinates) {
+    if (positionY == coordinates.length) {
+      return 0;
+    }
+
+    int score = 0;
+
+    for (int j = positionY + 1; j < coordinates.length; j++) {
+      score += 1;
+      if (coordinates[j][positionX] >= height) {
+        break;
+      }
+    }
+
+    return score;
+  }
+
+  int _scoreRight(List<List<int>> coordinates) {
+    if (positionX == coordinates[positionY].length) {
+      return 0;
+    }
+
+    int score = 0;
+
+    for (int i = positionX + 1; i < coordinates[positionY].length; i++) {
+      score += 1;
+      if (coordinates[positionY][i] >= height) {
+        break;
+      }
+    }
+
+    return score;
   }
 
   @override
