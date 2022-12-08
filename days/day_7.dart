@@ -1,51 +1,114 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-
 void main(List<String> arguments) {
-  final lines = File('inputs/day_7.txt')
-      .readAsStringSync()
-      .split('\n')
-      .where((line) => line.isNotEmpty)
-      .toList();
+  final lines = File('inputs/day_7.txt').readAsStringSync();
 
-  Map<String, Directory> directories = {};
-  String currentDirectory = '';
+  Directory currentDirectory = Directory('/');
+  RegExp regex = RegExp(r'(.+?) (.+)');
+  final clearLines = lines.replaceAll('\$ ', '');
 
-  for (String line in lines) {
-    if (line.contains(RegExp(r'\$ cd (\w+)')) || line.contains('\$ cd /')) {
-      currentDirectory = line.split(' ')[2];
-      directories[currentDirectory] = Directory([], 0);
-    } else if (line.contains(RegExp(r'(\d)'))) {
-      directories[currentDirectory]!.size += int.parse(line.split(' ')[0]);
-    } else if (line.contains(RegExp(r'dir'))) {
-      directories[currentDirectory]!.subDirectories.add(line.split(' ')[1]);
+  regex.allMatches(clearLines).forEach((e) {
+    String command = e[1]!;
+    String value = e[2]!;
+    switch (command) {
+      case 'cd':
+        {
+          if (value[0] == '/') {
+            currentDirectory.name = '/';
+          } else if (value == '..') {
+            currentDirectory = currentDirectory.parent!;
+          } else {
+            currentDirectory.addChild('${currentDirectory.name}$value/');
+            currentDirectory =
+                currentDirectory.children['${currentDirectory.name}$value/']!;
+          }
+        }
+        break;
+      case 'dir':
+        {
+          currentDirectory.addChild('${currentDirectory.name}$value/');
+        }
+        break;
+      default:
+        {
+          currentDirectory.size += int.parse(command);
+        }
     }
-  }
+  });
 
-  int solution1 =
-      directories.values.map((e) => e.totalSize(directories)).where((e) => e <= 100000).sum;
+  currentDirectory.root.updateTreeSize();
 
-  print('1 : $solution1');
-  //print('2 : $solution2');
+  print('1 : ${currentDirectory.root.solution1}');
+  print('2 : ${currentDirectory.root.solution2}');
 }
 
 class Directory {
-  List<String> subDirectories;
+  String name;
+  Directory? parent;
+  Map<String, Directory> children = {};
   int size;
+  int calculatedSize;
 
-  Directory(this.subDirectories, this.size);
+  Directory(
+    this.name, {
+    this.parent,
+    this.size = 0,
+    this.calculatedSize = 0,
+  });
 
-  int totalSize(Map<String, Directory> full) {
-    int r = size;
-    for (String subDirectory in subDirectories) {
-      r += full[subDirectory]!.totalSize(full);
+  Directory get root {
+    if (parent == null) {
+      return this;
+    } else {
+      return parent!.root;
     }
-    return r;
   }
 
-  @override
-  String toString() {
-    return '$subDirectories ($size)';
+  void addChild(String name) {
+    children.putIfAbsent(name, () => Directory(name, parent: this));
+  }
+
+  int get solution1 {
+    int result = calculatedSize <= 100000 ? calculatedSize : 0;
+    for (var child in children.values) {
+      result += child.solution1;
+    }
+    return result;
+  }
+
+  int get solution2 {
+    int needed = -(70000000 - calculatedSize - 30000000);
+    List<int> result = _recursiveSolution2(needed);
+    result.sort();
+    return result.first;
+  }
+
+  List<int> _recursiveSolution2(int needed) {
+    List<int> result = [];
+
+    if (calculatedSize >= needed) {
+      result.add(calculatedSize);
+
+      for (var child in children.values) {
+        result += child._recursiveSolution2(needed);
+      }
+    }
+
+    return result;
+  }
+
+  int _calculateSize() {
+    int result = size;
+    for (var child in children.values) {
+      result += child._calculateSize();
+    }
+    return result;
+  }
+
+  void updateTreeSize() {
+    calculatedSize = _calculateSize();
+    for (var child in children.values) {
+      child.updateTreeSize();
+    }
   }
 }
