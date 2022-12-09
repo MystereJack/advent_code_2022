@@ -1,191 +1,179 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:tuple/tuple.dart';
+
+class Tree {
+  int height;
+  Tree? left;
+  Tree? right;
+  Tree? top;
+  Tree? bottom;
+
+  Tree(
+    this.height, {
+    this.left,
+    this.right,
+    this.top,
+    this.bottom,
+  });
+
+  int _scoreLeft(int h) {
+    int score = 0;
+
+    if (left != null) {
+      score += 1;
+      if (h > left!.height) {
+        score += left!._scoreLeft(h);
+      }
+    }
+
+    return score;
+  }
+
+  int _scoreRight(int h) {
+    int score = 0;
+
+    if (right != null) {
+      score += 1;
+      if (h > right!.height) {
+        score += right!._scoreRight(h);
+      }
+    }
+
+    return score;
+  }
+
+  int _scoreBottom(int h) {
+    int score = 0;
+
+    if (bottom != null) {
+      score += 1;
+      if (h > bottom!.height) {
+        score += bottom!._scoreBottom(h);
+      }
+    }
+
+    return score;
+  }
+
+  int _scoreTop(int h) {
+    int score = 0;
+
+    if (top != null) {
+      score += 1;
+      if (h > top!.height) {
+        score += top!._scoreTop(h);
+      }
+    }
+
+    return score;
+  }
+
+  bool _leftVisible(int h) {
+    if (left != null && h <= left!.height) {
+      return false;
+    }
+
+    if (left == null) {
+      return true;
+    }
+
+    return left!._leftVisible(h);
+  }
+
+  bool _rightVisible(int h) {
+    if (right != null && h <= right!.height) {
+      return false;
+    }
+
+    if (right == null) {
+      return true;
+    }
+
+    return right!._rightVisible(h);
+  }
+
+  bool _topVisible(int h) {
+    if (top != null && h <= top!.height) {
+      return false;
+    }
+
+    if (top == null) {
+      return true;
+    }
+
+    return top!._topVisible(h);
+  }
+
+  bool _bottomVisible(int h) {
+    if (bottom != null && h <= bottom!.height) {
+      return false;
+    }
+
+    if (bottom == null) {
+      return true;
+    }
+
+    return bottom!._bottomVisible(h);
+  }
+
+  bool get visible {
+    return _leftVisible(height) ||
+        _rightVisible(height) ||
+        _topVisible(height) ||
+        _bottomVisible(height);
+  }
+
+  int get score {
+    return _scoreLeft(height) *
+        _scoreRight(height) *
+        _scoreBottom(height) *
+        _scoreTop(height);
+  }
+}
+
 void main(List<String> arguments) {
   final lines = File('inputs/day_8.txt')
       .readAsStringSync()
       .split('\n')
-      .where((line) => line.isNotEmpty);
+      .where((line) => line.isNotEmpty)
+      .toList();
 
-  List<List<int>> coordinates = [];
+  Map<Tuple2<int, int>, Tree> mapForest = {};
 
-  for (String line in lines) {
-    List<int> row = [];
-    for (String tree in line.split('')) {
-      try {
-        row.add(int.parse(tree));
-      } catch (e) {
-        // Nothing to do here ...
-      }
-    }
-    coordinates.add(row);
-  }
-
-  List<Tree> forest = [];
-
-  for (int i = 0; i < coordinates.length; i++) {
-    for (int j = 0; j < coordinates[i].length; j++) {
-      forest.add(Tree(
-        j,
-        i,
-        coordinates[i][j],
-        left: _calculateLeft(coordinates[i], j),
-        right: _calculateRight(coordinates[i], j),
-        bottom: _calculateBottom(coordinates, i, j),
-        top: _calculateTop(coordinates, i, j),
-      ));
+  for (int i = 0; i < lines.length; i++) {
+    final chars = lines[i].split('');
+    for (int j = 0; j < chars.length; j++) {
+      mapForest[Tuple2(j, i)] = Tree(int.parse(chars[j]));
     }
   }
 
-  int solution1 = forest.where((e) => e.visible).length;
-  int solution2 = forest.map((e) => e.score(coordinates)).reduce(max);
+  _populateNeighbors(mapForest, lines);
+
+  int solution1 = mapForest.values.where((e) => e.visible).length;
+  int solution2 = mapForest.values.map((e) => e.score).reduce(max);
 
   print('1 : $solution1');
   print('2 : $solution2');
 }
 
-int? _calculateTop(List<List<int>> coordinates, int i, int j) {
-  if (i == 0) {
-    return null;
-  }
-
-  return coordinates.sublist(0, i).reduce((v, e) => v[j] > e[j] ? v : e)[j];
-}
-
-int? _calculateBottom(List<List<int>> coordinates, int i, int j) {
-  if (i == coordinates.length - 1) {
-    return null;
-  }
-
-  return coordinates
-      .sublist(i + 1, coordinates.length)
-      .reduce((v, e) => v[j] > e[j] ? v : e)[j];
-}
-
-int? _calculateLeft(List<int> row, int j) {
-  if (j == 0) {
-    return null;
-  }
-
-  return row.sublist(0, j).reduce(max);
-}
-
-int? _calculateRight(List<int> row, int j) {
-  if (j == row.length - 1) {
-    return null;
-  }
-
-  return row.sublist(j + 1, row.length).reduce(max);
-}
-
-class Tree {
-  int positionX;
-  int positionY;
-  int height;
-
-  // Highest position
-  int? left;
-  int? right;
-  int? top;
-  int? bottom;
-
-  Tree(this.positionX, this.positionY, this.height,
-      {this.left, this.right, this.top, this.bottom});
-
-  bool get visible {
-    if (left == null || right == null || top == null || bottom == null) {
-      return true;
+void _populateNeighbors(Map<Tuple2<int, int>, Tree> map, List<String> lines) {
+  for (var entry in map.entries) {
+    if (entry.key.item1 != 0) {
+      entry.value.left = map[Tuple2(entry.key.item1 - 1, entry.key.item2)];
     }
 
-    if (left! < height ||
-        right! < height ||
-        top! < height ||
-        bottom! < height) {
-      return true;
+    if (entry.key.item1 + 1 != lines.length) {
+      entry.value.right = map[Tuple2(entry.key.item1 + 1, entry.key.item2)];
     }
 
-    return false;
-  }
-
-  int score(List<List<int>> coordinates) {
-    int score = 1;
-    score *= _scoreLeft(coordinates);
-    score *= _scoreRight(coordinates);
-    score *= _scoreTop(coordinates);
-    score *= _scoreBottom(coordinates);
-
-    return score;
-  }
-
-  int _scoreLeft(List<List<int>> coordinates) {
-    if (positionX == 0) {
-      return 0;
+    if (entry.key.item2 != 0) {
+      entry.value.top = map[Tuple2(entry.key.item1, entry.key.item2 - 1)];
     }
 
-    int score = 0;
-
-    for (int i = positionX - 1; i >= 0; i--) {
-      score += 1;
-      if (coordinates[positionY][i] >= height) {
-        break;
-      }
+    if (entry.key.item2 + 1 != lines[0].length) {
+      entry.value.bottom = map[Tuple2(entry.key.item1, entry.key.item2 + 1)];
     }
-
-    return score;
-  }
-
-  int _scoreTop(List<List<int>> coordinates) {
-    if (positionY == 0) {
-      return 0;
-    }
-
-    int score = 0;
-
-    for (int j = positionY - 1; j >= 0; j--) {
-      score += 1;
-      if (coordinates[j][positionX] >= height) {
-        break;
-      }
-    }
-    return score;
-  }
-
-  int _scoreBottom(List<List<int>> coordinates) {
-    if (positionY == coordinates.length) {
-      return 0;
-    }
-
-    int score = 0;
-
-    for (int j = positionY + 1; j < coordinates.length; j++) {
-      score += 1;
-      if (coordinates[j][positionX] >= height) {
-        break;
-      }
-    }
-
-    return score;
-  }
-
-  int _scoreRight(List<List<int>> coordinates) {
-    if (positionX == coordinates[positionY].length) {
-      return 0;
-    }
-
-    int score = 0;
-
-    for (int i = positionX + 1; i < coordinates[positionY].length; i++) {
-      score += 1;
-      if (coordinates[positionY][i] >= height) {
-        break;
-      }
-    }
-
-    return score;
-  }
-
-  @override
-  String toString() {
-    return '$height ($left, $right, $bottom, $top) - $visible';
   }
 }
