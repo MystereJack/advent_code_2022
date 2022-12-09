@@ -6,45 +6,44 @@ void main(List<String> arguments) {
   final lines = File('inputs/day_9.txt')
       .readAsStringSync()
       .split('\n')
-      .where((line) => line.isNotEmpty);
+      .where((line) => line.isNotEmpty)
+      .toList();
 
-  List<Coordonnee> headPosition = [];
-  List<Coordonnee> tailPosition = [];
+  final positionsSolution1 = List.generate(2, (_) => [Coordonnee(1000, 1000)]);
+  _calculatePositions(positionsSolution1, lines);
+  print('1 : ${positionsSolution1[1].toSet().length}');
 
-  // Initial position (pour éviter les positions négatives)
-  headPosition.add(Coordonnee(1000, 1000));
-  tailPosition.add(Coordonnee(1000, 1000));
+  final positionsSolution2 = List.generate(10, (_) => [Coordonnee(1000, 1000)]);
+  _calculatePositions(positionsSolution2, lines);
+  print('2 : ${positionsSolution2[9].toSet().length}');
+}
 
+void _calculatePositions(List<List<Coordonnee>> positions, List<String> lines) {
   for (String line in lines) {
-    //print('ORDER : $line');
     final order = line.split(' ');
 
     for (int i = 0; i < int.parse(order[1]); i++) {
       if (order[0] == 'L') {
-        headPosition.add(headPosition.last.moveLeft);
+        positions[0].add(positions[0].last.moveLeft);
       }
       if (order[0] == 'R') {
-        headPosition.add(headPosition.last.moveRight);
+        positions[0].add(positions[0].last.moveRight);
       }
       if (order[0] == 'U') {
-        headPosition.add(headPosition.last.moveUp);
+        positions[0].add(positions[0].last.moveUp);
       }
       if (order[0] == 'D') {
-        headPosition.add(headPosition.last.moveDown);
+        positions[0].add(positions[0].last.moveDown);
       }
 
-      //print('HEAD : ${headPosition.last}');
-      if (!headPosition.last.isAdjacent(tailPosition.last)) {
-        tailPosition.add(tailPosition.last.moveClose(headPosition.last));
+      for (int i = 0; i < positions.length - 1; i++) {
+        if (!positions[i].last.isAdjacent(positions[i + 1].last)) {
+          positions[i + 1]
+              .add(positions[i + 1].last.moveClose(positions[i].last));
+        }
       }
-      //print('TAIL : ${tailPosition.last}');
     }
   }
-
-  print('1 : ${tailPosition.toSet().length}');
-  /**
-  print('2 : ${currentDirectory.root.solution2}');
-   */
 }
 
 class Coordonnee {
