@@ -18,18 +18,12 @@ void main(List<String> arguments) {
 
   print('1 : $solution1');
 
-  int nbLine = 0;
   for (var element in journal.entries) {
-    if ((element.key - 1 - (nbLine * 40))
-        .isBetween(element.value - 1, element.value + 1)) {
-      stdout.write('#');
+    int position = (element.key - 1) % 40;
+    if (position.isBetween(element.value - 1, element.value + 1)) {
+      stdout.write('##');
     } else {
-      stdout.write('.');
-    }
-
-    if (element.key % 40 == 0) {
-      stdout.writeln('');
-      nbLine++;
+      element.key % 40 == 0 ? stdout.writeln('  ') : stdout.write('  ');
     }
   }
 }
