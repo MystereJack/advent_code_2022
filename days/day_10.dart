@@ -17,20 +17,34 @@ void main(List<String> arguments) {
   });
 
   print('1 : $solution1');
-  // print('2 : ${positionsSolution2[9].toSet().length}');
+
+  int nbLine = 0;
+  for (var element in journal.entries) {
+    if ((element.key - 1 - (nbLine * 40))
+        .isBetween(element.value - 1, element.value + 1)) {
+      stdout.write('#');
+    } else {
+      stdout.write('.');
+    }
+
+    if (element.key % 40 == 0) {
+      stdout.writeln('');
+      nbLine++;
+    }
+  }
 }
 
-Map<int, int> _executeOrder(Map<int, int> referentiel, String line) {
+Map<int, int> _executeOrder(Map<int, int> ref, String line) {
   final split = line.split(' ');
-  final e = referentiel.entries.last;
+  final e = ref.entries.last;
   if (split[0].contains('noop')) {
-    referentiel[e.key + 1] = e.value;
+    ref[e.key + 1] = e.value;
   } else if (split[0].contains('addx')) {
-    referentiel[e.key + 1] = e.value;
-    referentiel[e.key + 2] = e.value + int.parse(split[1]);
+    ref[e.key + 1] = e.value;
+    ref[e.key + 2] = e.value + int.parse(split[1]);
   }
 
-  return referentiel;
+  return ref;
 }
 
 extension on int {
@@ -39,4 +53,8 @@ extension on int {
     int range,
   ) =>
       {for (int i = this; i <= max; i += range) i};
+
+  bool isBetween(int from, int to) {
+    return from <= this && this <= to;
+  }
 }
