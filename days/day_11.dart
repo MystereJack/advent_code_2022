@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+// 2 * 3 * 5 * 7 * 11 * 13 * 17 * 19
 final int mod = 9699690;
 
 void main(List<String> arguments) {
