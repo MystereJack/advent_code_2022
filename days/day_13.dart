@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 
@@ -21,7 +20,7 @@ void solution2() {
       .toList()
     ..add(sep1)
     ..add(sep2)
-    ..sort(_sort);
+    ..sort(_compare);
 
   int solution2 = (lines.indexOf(sep1) + 1) * (lines.indexOf(sep2) + 1);
 
@@ -42,54 +41,18 @@ void solution1() {
 }
 
 int _solution1(int index, dynamic a, dynamic b) {
-  try {
-    _processData(a, b);
-  } on OKException {
-    return index;
-  } catch (e) {
-    // Nothing to do here
-  }
-
-  return 0;
+  return _compare(a, b) == -1 ? index : 0;
 }
 
-class OKException implements Exception {}
-
-void _processData(List<dynamic> left, List<dynamic> right) {
-  for (int i = 0; i < math.max(left.length, right.length); i++) {
-    if (i >= right.length) {
-      throw Exception();
-    } else if (i >= left.length) {
-      throw OKException();
-    } else {
-      dynamic leftItem = left[i];
-      dynamic rightItem = right[i];
-
-      if (leftItem is int && rightItem is int) {
-        if (leftItem > rightItem) {
-          throw Exception();
-        } else if (leftItem < rightItem) {
-          throw OKException();
-        }
-      } else {
-        _processData(
-          leftItem is int ? [leftItem] : leftItem,
-          rightItem is int ? [rightItem] : rightItem,
-        );
-      }
-    }
-  }
-}
-
-int _sort(dynamic left, dynamic right) {
+int _compare(dynamic left, dynamic right) {
   if (left is int && right is int) {
     return left.compareTo(right);
   }
   if (left is List && right is int) {
-    return _sort(left, [right]);
+    return _compare(left, [right]);
   }
   if (right is List && left is int) {
-    return _sort([left], right);
+    return _compare([left], right);
   }
 
   if (left is List && right is List) {
@@ -98,7 +61,7 @@ int _sort(dynamic left, dynamic right) {
       if (i >= left.length || i >= right.length) {
         return left.length.compareTo(right.length);
       }
-      final result = _sort(left[i], right[i]);
+      final result = _compare(left[i], right[i]);
       if (result != 0) {
         return result;
       }
@@ -106,5 +69,5 @@ int _sort(dynamic left, dynamic right) {
     }
   }
 
-  throw StateError('Invalid state');
+  throw Exception();
 }
