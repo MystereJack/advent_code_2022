@@ -2,39 +2,55 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:quiver/iterables.dart';
-import 'package:tuple/tuple.dart';
+import 'package:collection/collection.dart';
 
 void main(List<String> arguments) {
-  int solution1 = partition(
-          File('inputs/day_13.txt')
-              .readAsStringSync()
-              .split('\n')
-              .where((el) => el.isNotEmpty)
-              .toList(),
-          2)
-      .map(_createTuple)
-      .fold(Tuple2(1, 0), _solution1)
-      .item2;
+  solution1();
+  solution2();
+}
+
+void solution2() {
+  final sep1 = jsonDecode('[[2]]');
+  final sep2 = jsonDecode('[[6]]');
+
+  final lines = File('inputs/day_13.txt')
+      .readAsStringSync()
+      .split('\n')
+      .where((el) => el.isNotEmpty)
+      .map((e) => jsonDecode(e))
+      .toList()
+    ..add(sep1)
+    ..add(sep2)
+    ..sort(_sort);
+
+  int solution2 = (lines.indexOf(sep1) + 1) * (lines.indexOf(sep2) + 1);
+
+  print('2: $solution2');
+}
+
+void solution1() {
+  int solution1 = File('inputs/day_13.txt')
+      .readAsStringSync()
+      .split('\n')
+      .where((el) => el.isNotEmpty)
+      .slices(2)
+      .map((pair) => pair.map((e) => jsonDecode(e)))
+      .mapIndexed((i, pair) => _solution1(i, pair.first, pair.last))
+      .sum;
 
   print('1: $solution1');
 }
 
-Tuple2<dynamic, dynamic> _createTuple(List<String> lines) {
-  return Tuple2(jsonDecode(lines[0]), jsonDecode(lines[1]));
-}
-
-Tuple2<int, int> _solution1(Tuple2<int, int> previous, Tuple2<dynamic, dynamic> data) {
-  int total = previous.item2;
+int _solution1(int index, dynamic a, dynamic b) {
   try {
-    _processData(data.item1, data.item2);
+    _processData(a, b);
   } on OKException {
-    total += previous.item1;
+    return index;
   } catch (e) {
     // Nothing to do here
   }
 
-  return Tuple2(previous.item1 + 1, total);
+  return 0;
 }
 
 class OKException implements Exception {}
@@ -63,4 +79,32 @@ void _processData(List<dynamic> left, List<dynamic> right) {
       }
     }
   }
+}
+
+int _sort(dynamic left, dynamic right) {
+  if (left is int && right is int) {
+    return left.compareTo(right);
+  }
+  if (left is List && right is int) {
+    return _sort(left, [right]);
+  }
+  if (right is List && left is int) {
+    return _sort([left], right);
+  }
+
+  if (left is List && right is List) {
+    int i = 0;
+    while (true) {
+      if (i >= left.length || i >= right.length) {
+        return left.length.compareTo(right.length);
+      }
+      final result = _sort(left[i], right[i]);
+      if (result != 0) {
+        return result;
+      }
+      i++;
+    }
+  }
+
+  throw StateError('Invalid state');
 }
