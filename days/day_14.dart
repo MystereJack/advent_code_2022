@@ -14,21 +14,13 @@ void main(List<String> arguments) {
       .toSet();
 
   Set<Coordinate> sands = {};
-  while (true) {
-    if (!_moveSandUnit(SandUnit(Coordinate(500, 0)), sands, rocks, true)) {
-      break;
-    }
-  }
+  while (!_moveSandUnit(Coordinate(500, 0), sands, rocks, true)) {}
 
   print('1: ${sands.length}');
   _printResult(sands, rocks);
 
   sands = {};
-  while (true) {
-    if (!_moveSandUnit(SandUnit(Coordinate(500, 0)), sands, rocks, false)) {
-      break;
-    }
-  }
+  while (!_moveSandUnit(Coordinate(500, 0), sands, rocks, false)) {}
 
   print('2: ${sands.length}');
   _printResult(sands, rocks);
@@ -55,40 +47,38 @@ void _printResult(Set<Coordinate> sands, Set<Coordinate> rocks) {
   }
 }
 
-bool _moveSandUnit(SandUnit sand, Set<Coordinate> sands, Set<Coordinate> rocks, bool partOne) {
+bool _moveSandUnit(Coordinate sand, Set<Coordinate> sands, Set<Coordinate> rocks, bool partOne) {
   if (partOne) {
     // Si on a touché les abysses
     final abyss = rocks.map((e) => e.y).max + 1;
 
-    if (sand.coordinate.y >= abyss) {
+    if (sand.y >= abyss) {
       return false;
     }
   } else {
     // Si on a touché le sol, on ajoute le sable
     final floor = rocks.map((e) => e.y).max + 1;
 
-    if (sand.coordinate.y >= floor) {
-      sands.add(sand.coordinate);
+    if (sand.y >= floor) {
+      sands.add(sand);
       return true;
     }
   }
 
-  if (!sands.contains(sand.moveDown.coordinate) && !rocks.contains(sand.moveDown.coordinate)) {
+  if (!sands.contains(sand.moveDown) && !rocks.contains(sand.moveDown)) {
     return _moveSandUnit(sand.moveDown, sands, rocks, partOne);
-  } else if (!sands.contains(sand.moveLeft.coordinate) &&
-      !rocks.contains(sand.moveLeft.coordinate)) {
+  } else if (!sands.contains(sand.moveLeft) && !rocks.contains(sand.moveLeft)) {
     return _moveSandUnit(sand.moveLeft, sands, rocks, partOne);
-  } else if (!sands.contains(sand.moveRight.coordinate) &&
-      !rocks.contains(sand.moveRight.coordinate)) {
+  } else if (!sands.contains(sand.moveRight) && !rocks.contains(sand.moveRight)) {
     return _moveSandUnit(sand.moveRight, sands, rocks, partOne);
   } else {
     if (!partOne) {
-      if (sand.coordinate == Coordinate(500, 0)) {
-        sands.add(sand.coordinate);
+      if (sand == Coordinate(500, 0)) {
+        sands.add(sand);
         return false;
       }
     }
-    sands.add(sand.coordinate);
+    sands.add(sand);
     return true;
   }
 }
@@ -147,27 +137,16 @@ class Coordinate extends Equatable {
   String toString() {
     return '[$x,$y]';
   }
-}
 
-class SandUnit {
-  final Coordinate coordinate;
-
-  SandUnit(this.coordinate);
-
-  SandUnit get moveDown {
-    return SandUnit(Coordinate(coordinate.x, coordinate.y + 1));
+  Coordinate get moveDown {
+    return Coordinate(x, y + 1);
   }
 
-  SandUnit get moveLeft {
-    return SandUnit(Coordinate(coordinate.x - 1, coordinate.y + 1));
+  Coordinate get moveLeft {
+    return Coordinate(x - 1, y + 1);
   }
 
-  SandUnit get moveRight {
-    return SandUnit(Coordinate(coordinate.x + 1, coordinate.y + 1));
-  }
-
-  @override
-  String toString() {
-    return '[${coordinate.x},${coordinate.y}]';
+  Coordinate get moveRight {
+    return Coordinate(x + 1, y + 1);
   }
 }
