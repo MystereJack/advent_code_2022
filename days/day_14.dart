@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'dart:math' as m;
 
 import '../common/int_x.dart';
+import '../common/vector2.dart';
 
 void main(List<String> arguments) {
   final rocks = File('inputs/day_14.txt')
@@ -13,20 +13,20 @@ void main(List<String> arguments) {
       .expand(_parseRocks)
       .toSet();
 
-  Set<Coordinate> sands = {};
-  while (!_moveSandUnit(Coordinate(500, 0), sands, rocks, true)) {}
+  Set<Vector2> sands = {};
+  while (!_moveSandUnit(Vector2(500, 0), sands, rocks, true)) {}
 
   print('1: ${sands.length}');
   _printResult(sands, rocks);
 
   sands = {};
-  while (!_moveSandUnit(Coordinate(500, 0), sands, rocks, false)) {}
+  while (!_moveSandUnit(Vector2(500, 0), sands, rocks, false)) {}
 
   print('2: ${sands.length}');
   _printResult(sands, rocks);
 }
 
-void _printResult(Set<Coordinate> sands, Set<Coordinate> rocks) {
+void _printResult(Set<Vector2> sands, Set<Vector2> rocks) {
   int borderLeft = m.min(sands.map((e) => e.x).min, rocks.map((e) => e.x).min) - 5;
   int borderRight = m.max(sands.map((e) => e.x).max, rocks.map((e) => e.x).max) + 5;
   int borderUp = m.min(sands.map((e) => e.y).min, rocks.map((e) => e.y).min);
@@ -35,9 +35,9 @@ void _printResult(Set<Coordinate> sands, Set<Coordinate> rocks) {
   for (int i = borderUp; i <= borderDown; i++) {
     stdout.write('$i ');
     for (int j = borderLeft; j <= borderRight; j++) {
-      if (sands.contains(Coordinate(j, i))) {
+      if (sands.contains(Vector2(j, i))) {
         stdout.write('o');
-      } else if (rocks.contains(Coordinate(j, i))) {
+      } else if (rocks.contains(Vector2(j, i))) {
         stdout.write('#');
       } else {
         stdout.write('.');
@@ -47,7 +47,7 @@ void _printResult(Set<Coordinate> sands, Set<Coordinate> rocks) {
   }
 }
 
-bool _moveSandUnit(Coordinate sand, Set<Coordinate> sands, Set<Coordinate> rocks, bool partOne) {
+bool _moveSandUnit(Vector2 sand, Set<Vector2> sands, Set<Vector2> rocks, bool partOne) {
   if (partOne) {
     // Si on a touché les abysses
     final abyss = rocks.map((e) => e.y).max + 1;
@@ -65,15 +65,15 @@ bool _moveSandUnit(Coordinate sand, Set<Coordinate> sands, Set<Coordinate> rocks
     }
   }
 
-  if (!sands.contains(sand.moveDown) && !rocks.contains(sand.moveDown)) {
-    return _moveSandUnit(sand.moveDown, sands, rocks, partOne);
-  } else if (!sands.contains(sand.moveLeft) && !rocks.contains(sand.moveLeft)) {
-    return _moveSandUnit(sand.moveLeft, sands, rocks, partOne);
-  } else if (!sands.contains(sand.moveRight) && !rocks.contains(sand.moveRight)) {
-    return _moveSandUnit(sand.moveRight, sands, rocks, partOne);
+  if (!sands.contains(sand.moveBottom) && !rocks.contains(sand.moveBottom)) {
+    return _moveSandUnit(sand.moveBottom, sands, rocks, partOne);
+  } else if (!sands.contains(sand.moveBottomLeft) && !rocks.contains(sand.moveBottomLeft)) {
+    return _moveSandUnit(sand.moveBottomLeft, sands, rocks, partOne);
+  } else if (!sands.contains(sand.moveBottomRight) && !rocks.contains(sand.moveBottomRight)) {
+    return _moveSandUnit(sand.moveBottomRight, sands, rocks, partOne);
   } else {
     if (!partOne) {
-      if (sand == Coordinate(500, 0)) {
+      if (sand == Vector2(500, 0)) {
         sands.add(sand);
         return false;
       }
@@ -83,7 +83,7 @@ bool _moveSandUnit(Coordinate sand, Set<Coordinate> sands, Set<Coordinate> rocks
   }
 }
 
-Iterable<Coordinate> _parseRocks(String line) sync* {
+Iterable<Vector2> _parseRocks(String line) sync* {
   int lastX = 0;
   int lastY = 0;
   for (String rock in line.split(' -> ')) {
@@ -103,7 +103,7 @@ Iterable<Coordinate> _parseRocks(String line) sync* {
         throw StateError('X et Y sont égaux !');
       }
       for (int y in listY) {
-        yield Coordinate(c.elementAt(0), y);
+        yield Vector2(c.elementAt(0), y);
       }
       lastY = c.elementAt(1);
     } // Si c'est le X qui bouge
@@ -117,36 +117,9 @@ Iterable<Coordinate> _parseRocks(String line) sync* {
         throw StateError('X et Y sont égaux !');
       }
       for (int x in listX) {
-        yield Coordinate(x, c.elementAt(1));
+        yield Vector2(x, c.elementAt(1));
       }
       lastX = c.elementAt(0);
     }
-  }
-}
-
-class Coordinate extends Equatable {
-  final int x;
-  final int y;
-
-  Coordinate(this.x, this.y);
-
-  @override
-  List<Object?> get props => [x, y];
-
-  @override
-  String toString() {
-    return '[$x,$y]';
-  }
-
-  Coordinate get moveDown {
-    return Coordinate(x, y + 1);
-  }
-
-  Coordinate get moveLeft {
-    return Coordinate(x - 1, y + 1);
-  }
-
-  Coordinate get moveRight {
-    return Coordinate(x + 1, y + 1);
   }
 }
