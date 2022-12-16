@@ -1,4 +1,4 @@
-extension intX on int {
+extension IntX on int {
   Set<int> upTo(
     int max,
   ) =>
